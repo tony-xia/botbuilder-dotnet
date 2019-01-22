@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder.Dialogs.Choices;
 
 namespace Microsoft.Bot.Builder.Dialogs
 {
@@ -93,7 +94,22 @@ namespace Microsoft.Bot.Builder.Dialogs
         /// <param name="options">Contains a Prompt, potentially a RetryPrompt and if using ChoicePrompt, Choices.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<DialogTurnResult> PromptAsync(string dialogId, PromptOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<DialogTurnResult> PromptAsync(string dialogId, PromptOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return PromptAsync(dialogId, options, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Helper function to simplify formatting the options for calling a prompt dialog. This helper will
+        /// take a `PromptOptions` argument and then call
+        /// <see cref="BeginDialogAsync(string, object, CancellationToken)"/>.
+        /// </summary>
+        /// <param name="dialogId">ID of the prompt to start.</param>
+        /// <param name="options">Contains a Prompt, potentially a RetryPrompt and if using ChoicePrompt, Choices.</param>
+        /// <param name="choices">Contains choices to add to the PromptOptions.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<DialogTurnResult> PromptAsync(string dialogId, PromptOptions options, IList<Choice> choices, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrEmpty(dialogId))
             {
@@ -103,6 +119,11 @@ namespace Microsoft.Bot.Builder.Dialogs
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
+            }
+
+            if (choices != null)
+            {
+                options.Choices = choices;
             }
 
             return await BeginDialogAsync(dialogId, options, cancellationToken).ConfigureAwait(false);
